@@ -126,8 +126,8 @@ class DoctorDetailsScreen extends StatelessWidget {
                 ],
               ),
             ),
-            SizedBox(height: 24),
-
+            SizedBox(height: 25),
+//new coment
             // Basic Info
             _buildSectionTitle('Basic Information'),
             _buildInfoRow('Email', doctorData['email'] ?? 'N/A'),
