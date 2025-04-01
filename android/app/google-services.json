@@ -1,0 +1,90 @@
+{
+  "project_info": {
+    "project_number": "913168016292",
+    "project_id": "care-cub",
+    "storage_bucket": "care-cub.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:913168016292:android:addb1b427a11f995511731",
+        "android_client_info": {
+          "package_name": "com.example.carecub"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "913168016292-qi4g2ajce2uqdntqm75fbd5psus3u3i3.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.carecub",
+            "certificate_hash": "17f22facbd7357feb69a25ea499fc67811a13a50"
+          }
+        },
+        {
+          "client_id": "913168016292-qj03sp88k77jlt0or0ohum73i8ua73c4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDW8FMwcbYcO4xNVq0e4trdjSFCW_B-W5s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "913168016292-qj03sp88k77jlt0or0ohum73i8ua73c4.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "913168016292-sndl940obgsgt0b8256bi1p4dvg3015m.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.carecubpartners"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:913168016292:android:4d28a38d7ea6924b511731",
+        "android_client_info": {
+          "package_name": "com.example.carecubadmin"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "913168016292-qj03sp88k77jlt0or0ohum73i8ua73c4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDW8FMwcbYcO4xNVq0e4trdjSFCW_B-W5s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "913168016292-qj03sp88k77jlt0or0ohum73i8ua73c4.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "913168016292-sndl940obgsgt0b8256bi1p4dvg3015m.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.carecubpartners"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
