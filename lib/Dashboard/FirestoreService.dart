@@ -11,7 +11,13 @@ class FirestoreService {
         .get();
     return querySnapshot.docs.length;
   }
-
+  Future<int> getPendingDayCare() async {
+    final querySnapshot = await _firestore
+        .collection('DayCare')
+        .where('isVerified', isEqualTo: false)
+        .get();
+    return querySnapshot.docs.length;
+  }
   // Fetch the count of active parents
   Future<int> getActiveParentsCount() async {
     final querySnapshot = await _firestore
@@ -19,6 +25,14 @@ class FirestoreService {
         .get();
     return querySnapshot.docs.length;
   }
+  Future<int> getActiveDaycareCount() async {
+    final querySnapshot = await _firestore
+        .collection('DayCare')
+        .where('isVerified', isEqualTo: true)
+        .get();
+    return querySnapshot.docs.length;
+  }
+
 
   // Fetch the count of active doctors
   Future<int> getActiveDoctorsCount() async {
@@ -31,7 +45,7 @@ class FirestoreService {
 
   // Fetch the count of daycare centers
   Future<int> getDaycareCentersCount() async {
-    final querySnapshot = await _firestore.collection('daycareCenters').get();
+    final querySnapshot = await _firestore.collection('DayCare').get();
     return querySnapshot.docs.length;
   }
 
@@ -56,4 +70,16 @@ class FirestoreService {
       'doctors': (doctorsCount / totalUsers) * 100,
     };
   }
+  Future<int> getPendingReportsCount() async {
+    try {
+      final snapshot = await _firestore.collection('reports')
+          .where('status', isEqualTo: 'pending')
+          .get();
+      return snapshot.size;
+    } catch (e) {
+      print('Error getting pending reports count: $e');
+      return 0;
+    }
+  }
+
 }

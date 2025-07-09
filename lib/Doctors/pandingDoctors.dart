@@ -5,15 +5,14 @@ import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:html' as html;
 
-import 'Dashboard/Dashboard.dart';
-import 'bookingScreen.dart';
+import '../Dashboard/Dashboard.dart';
 
-class ActiveDoctors extends StatelessWidget {
+class UnverifiedDoctorsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Verified Doctors'),
+        title: Text('Unverified Doctors',style: TextStyle(color: Colors.white),),
         centerTitle: true,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.white),
@@ -28,7 +27,7 @@ class ActiveDoctors extends StatelessWidget {
         flexibleSpace: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [Colors.blue.shade700, Colors.lightBlue.shade400],
+              colors: [Colors.blue.shade900, Colors.lightBlue.shade700],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -46,7 +45,7 @@ class ActiveDoctors extends StatelessWidget {
         child: StreamBuilder<QuerySnapshot>(
           stream: FirebaseFirestore.instance
               .collection('Doctors')
-              .where('isVerified', isEqualTo: true)
+              .where('isVerified', isEqualTo: false)
               .snapshots(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
@@ -70,7 +69,7 @@ class ActiveDoctors extends StatelessWidget {
                     Icon(Icons.people_outline, size: 60, color: Colors.grey),
                     SizedBox(height: 16),
                     Text(
-                      'No doctors found',
+                      'No unverified doctors found',
                       style: TextStyle(fontSize: 18, color: Colors.grey),
                     ),
                   ],
@@ -99,11 +98,10 @@ class ActiveDoctors extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) =>
-                              DoctorDetailsScreen(
-                                doctorData: doctor,
-                                doctorId: doctorId,
-                              ),
+                          builder: (context) => DoctorDetailsScreen(
+                            doctorData: doctor,
+                            doctorId: doctorId,
+                          ),
                         ),
                       );
                     },
@@ -116,8 +114,7 @@ class ActiveDoctors extends StatelessWidget {
                             backgroundImage: doctor['photoUrl'] != null &&
                                 doctor['photoUrl'].isNotEmpty
                                 ? NetworkImage(doctor['photoUrl'])
-                                : AssetImage(
-                                'assets/default_doctor.png') as ImageProvider,
+                                : AssetImage('assets/default_doctor.png') as ImageProvider,
                           ),
                           SizedBox(width: 16),
                           Expanded(
@@ -141,8 +138,7 @@ class ActiveDoctors extends StatelessWidget {
                                 ),
                                 SizedBox(height: 4),
                                 Text(
-                                  doctor['Primary_specialization'] ??
-                                      'Specialist',
+                                  doctor['Primary_specialization'] ?? 'Specialist',
                                   style: TextStyle(
                                     fontSize: 14,
                                     color: Colors.deepOrangeAccent.shade400,
@@ -154,12 +150,11 @@ class ActiveDoctors extends StatelessWidget {
                           Container(
                             padding: EdgeInsets.all(6),
                             decoration: BoxDecoration(
-                              color: Colors.green,
+                              color: Colors.red,
                               shape: BoxShape.circle,
                               border: Border.all(color: Colors.white, width: 2),
                             ),
-                            child: Icon(
-                                Icons.verified, color: Colors.white, size: 20),
+                            child: Icon(Icons.close, color: Colors.white, size: 20),
                           ),
                         ],
                       ),
@@ -174,6 +169,7 @@ class ActiveDoctors extends StatelessWidget {
     );
   }
 }
+
 class DoctorDetailsScreen extends StatefulWidget {
   final Map<String, dynamic> doctorData;
   final String doctorId;
@@ -188,37 +184,40 @@ class DoctorDetailsScreen extends StatefulWidget {
 }
 
 class _DoctorDetailsScreenState extends State<DoctorDetailsScreen> {
+  // In the DoctorDetailsScreen class, add this state variable
+  bool isVerified = false;
+
+  @override
+  void initState() {
+    super.initState();
+    isVerified = widget.doctorData['isVerified'] ?? false;
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Doctor Profile'),
+        title: Text('Doctor Profile',style: TextStyle(color: Colors.white),),
         centerTitle: true,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () {
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => UnverifiedDoctorsScreen()),
+                  (Route<dynamic> route) => false,
+            );
+          },
+        ),
         flexibleSpace: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [Colors.blue.shade700, Colors.lightBlue.shade400],
+              colors: [Colors.blue.shade900, Colors.lightBlue.shade700],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
           ),
         ),
-        actions: [
-          ElevatedButton(
-            child: Text("See Dr's Bookings"),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => BookingsScreen(
-                    doctorId: widget.doctorId,
-                    doctorName: widget.doctorData['name'],
-                  ),
-                ),
-              );
-              },
-          ),
-        ],
+
       ),
       body: Container(
         decoration: BoxDecoration(
@@ -238,7 +237,7 @@ class _DoctorDetailsScreenState extends State<DoctorDetailsScreen> {
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(16),
                   gradient: LinearGradient(
-                    colors: [Colors.blue.shade600, Colors.lightBlue.shade300],
+                    colors: [Colors.blue.shade900, Colors.lightBlue.shade700],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
@@ -272,12 +271,12 @@ class _DoctorDetailsScreenState extends State<DoctorDetailsScreen> {
                           Container(
                             padding: EdgeInsets.all(6),
                             decoration: BoxDecoration(
-                              color: Colors.green,
+                              color: isVerified ? Colors.green : Colors.red,
                               shape: BoxShape.circle,
                               border: Border.all(color: Colors.white, width: 2),
                             ),
                             child: Icon(
-                              Icons.verified,
+                              isVerified ? Icons.verified : Icons.close,
                               color: Colors.white,
                               size: 20,
                             ),
@@ -306,11 +305,11 @@ class _DoctorDetailsScreenState extends State<DoctorDetailsScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          _buildStatItem(Icons.star, '${widget.doctorData['rating'] ?? '4.8'}', 'Rating'),
+                          _buildStatItem(Icons.star, '${widget.doctorData['rating'] ?? '0.0'}', 'Rating'),
                           SizedBox(width: 20),
                           _buildStatItem(Icons.medical_services, '${widget.doctorData['experience'] ?? '0'}+', 'Years Exp.'),
                           SizedBox(width: 20),
-                          _buildStatItem(Icons.people, '${widget.doctorData['patients'] ?? '100'}+', 'Patients'),
+                          _buildStatItem(Icons.people, '${widget.doctorData['patients'] ?? '0'}+', 'Patients'),
                         ],
                       ),
                       SizedBox(height: 16),
@@ -319,16 +318,17 @@ class _DoctorDetailsScreenState extends State<DoctorDetailsScreen> {
                         children: [
                           // Also update the verify button to be disabled when already verified
                           ElevatedButton.icon(
-                            icon: Icon(Icons.verified_user, size: 20,color: Colors.deepOrange.shade500),
-                            label: Text('Verified',style: TextStyle(color: Colors.deepOrange.shade500),),
+                            icon: Icon(Icons.verified_user, size: 20),
+                            label: Text(isVerified ? 'Verified' : 'Verify Doctor'),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.grey ,
+                              backgroundColor: isVerified ? Colors.grey : Colors.green,
                               padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(30),
                               ),
                             ),
-                            onPressed: () {
+                            onPressed: isVerified ? null : () {
+                              _verifyDoctor(context);
                             },
                           ),
                           SizedBox(width: 16),
@@ -352,7 +352,7 @@ class _DoctorDetailsScreenState extends State<DoctorDetailsScreen> {
                                 return;
                               }
 
-                              final subject = Uri.encodeComponent('Care Cub Inquiry - ${widget.doctorData['name']}');
+                              final subject = Uri.encodeComponent('Care Cub Registration Inquiry - ${widget.doctorData['name']}');
                               final body = Uri.encodeComponent('Dear Dr. ${widget.doctorData['name']},\n\n');
 
                               // Direct Gmail compose URL
@@ -395,22 +395,8 @@ class _DoctorDetailsScreenState extends State<DoctorDetailsScreen> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // About Section
-                  _buildSectionTitle('About Doctor'),
-                  Card(
-                    elevation: 2,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Padding(
-                      padding: EdgeInsets.all(16),
-                      child: Text(
-                        widget.doctorData['about'] ?? 'No description available',
-                        style: TextStyle(fontSize: 15, height: 1.5),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 16),
+
+                  SizedBox(height: 8),
 
                   // Basic Info
                   _buildSectionTitle('Basic Information'),
@@ -466,7 +452,6 @@ class _DoctorDetailsScreenState extends State<DoctorDetailsScreen> {
                           .map((service) => _buildInfoRow(Icons.local_hospital, 'Service', service))
                           .toList(),
                     ),
-                  ReviewCard(),
 
                   // Clinics Information
                   _buildSectionTitle('Clinics'),
@@ -584,6 +569,7 @@ class _DoctorDetailsScreenState extends State<DoctorDetailsScreen> {
                   .update({'isVerified': true})
                   .then((_) {
                 setState(() {
+                  isVerified = true;
                 });
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
@@ -749,378 +735,6 @@ class _DoctorDetailsScreenState extends State<DoctorDetailsScreen> {
             ),
           ),
         ],
-      ),
-    );
-  }
-  Widget ReviewCard() {
-    return FutureBuilder<QuerySnapshot>(
-      future: FirebaseFirestore.instance
-          .collection('doctor_reviews')
-          .where('doctorId', isEqualTo: widget.doctorId)
-          .get(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator());
-        }
-
-        if (snapshot.hasError) {
-          return Center(child: Text('Error loading reviews'));
-        }
-
-        final reviews = snapshot.data?.docs ?? [];
-        final totalReviews = reviews.length;
-
-        // Calculate average ratings
-        double doctorRatingTotal = 0;
-        double clinicRatingTotal = 0;
-        double staffRatingTotal = 0;
-
-        for (var review in reviews) {
-          final data = review.data() as Map<String, dynamic>;
-          doctorRatingTotal += (data['doctorRating'] as num).toDouble();
-          clinicRatingTotal += (data['clinicRating'] as num).toDouble();
-          staffRatingTotal += (data['staffRating'] as num).toDouble();
-        }
-
-        final avgDoctorRating = totalReviews > 0 ? (doctorRatingTotal / totalReviews) : 0;
-        final avgClinicRating = totalReviews > 0 ? (clinicRatingTotal / totalReviews) : 0;
-        final avgStaffRating = totalReviews > 0 ? (staffRatingTotal / totalReviews) : 0;
-        final overallRating = totalReviews > 0
-            ? ((avgDoctorRating + avgClinicRating + avgStaffRating) / 3)
-            : 0;
-
-        // Get latest 2 reviews for display
-        final latestReviews = reviews.take(2).toList();
-
-        return Card(
-          color: Colors.white,
-          margin: EdgeInsets.only(left: 16, right: 16, top: 16),
-          elevation: 4,
-          child: Padding(
-            padding: EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      children: [
-                        // Icon(Icons.star, color: Colors.blueAccent.shade700),
-                        SizedBox(width: 10),
-                        Text(
-                          "Dr. ${widget.doctorData['name']}'s Reviews",
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                    Row(
-                      children: [
-                        Icon(Icons.star, color: Colors.blueAccent.shade700, size: 24),
-                        SizedBox(width: 4),
-                        Text(
-                          overallRating.toStringAsFixed(1),
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        CircleAvatar(
-                          radius: 40,
-                          backgroundColor: Colors.black,
-                          child: Text(
-                            "${(overallRating * 20).toStringAsFixed(0)}%",
-                            style: TextStyle(color: Colors.white, fontSize: 25),
-                          ),
-                        ),
-                        Text(
-                          "Satisfied out of ($totalReviews)",
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(width: 20),
-                    Column(
-                      children: [
-                        RatingRow("Doctor Checkup", "${avgDoctorRating.toStringAsFixed(1)}/5"),
-                        RatingRow("Clinic Environment", "${avgClinicRating.toStringAsFixed(1)}/5"),
-                        RatingRow("Staff Behaviour", "${avgStaffRating.toStringAsFixed(1)}/5"),
-                      ],
-                    ),
-                  ],
-                ),
-                SizedBox(height: 20),
-                if (latestReviews.isNotEmpty)
-                  ...latestReviews.map((review) {
-                    final data = review.data() as Map<String, dynamic>;
-                    final date = (data['createdAt'] as Timestamp).toDate();
-                    final formattedDate = DateFormat('MMM d, y').format(date);
-
-                    return Container(
-                      padding: EdgeInsets.all(12),
-                      margin: EdgeInsets.only(bottom: 12),
-                      decoration: BoxDecoration(
-                        color: Colors.blueGrey[50],
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            '"${data['feedback'] ?? 'No feedback provided'}"',
-                            style: TextStyle(
-                              fontStyle: FontStyle.italic,
-                              color: Colors.grey[800],
-                            ),
-                          ),
-                          SizedBox(height: 8),
-                          Text(
-                            'Verified patient: ${_obscureName(data['patientName'] ?? 'Anonymous')} · $formattedDate',
-                            style: TextStyle(
-                              fontStyle: FontStyle.italic,
-                              color: Colors.grey[500],
-                            ),
-                          ),
-                          SizedBox(height: 8),
-                          Row(
-                            children: [
-                              Icon(Icons.star, color: Colors.orangeAccent.shade700, size: 16),
-                              Text(
-                                ' ${data['overallRating']?.toStringAsFixed(1) ?? '0'}',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.orangeAccent.shade700,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    );
-                  }).toList(),
-                OutlinedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => DoctorReviewsScreen(
-                          doctorId: widget.doctorId,
-                          doctorName: widget.doctorData['name'],
-                        ),
-                      ),
-                    );
-                  },
-                  child: Text("See All Reviews", style: TextStyle(fontSize: 15)),
-                  style: OutlinedButton.styleFrom(shape: StadiumBorder()),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  String _obscureName(String name) {
-    if (name.isEmpty || name == 'Anonymous') return 'Anonymous';
-    final parts = name.split(' ');
-    if (parts.length == 1) return '${parts[0][0]}***';
-    return '${parts[0][0]}*** ${parts.last[0]}***';
-  }
-
-  Widget RatingRow(String label, String rating) {
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 4),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey[600],
-            ),
-          ),
-          Text(
-            rating,
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: Colors.green,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-class DoctorReviewsScreen extends StatelessWidget {
-  final String doctorId;
-  final String doctorName;
-
-  const DoctorReviewsScreen({
-    required this.doctorId,
-    required this.doctorName,
-    Key? key,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Reviews for Dr. $doctorName'),
-      ),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance
-            .collection('doctor_reviews')
-            .where('doctorId', isEqualTo: doctorId)
-        //.orderBy('createdAt', descending: true)
-            .snapshots(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          }
-
-          if (snapshot.hasError) {
-            return Center(
-              child: Text(
-                'Error loading reviews: ${snapshot.error.toString()}',
-                style: TextStyle(color: Colors.red),
-              ),
-            );
-          }
-
-          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return Center(
-              child: Text(
-                'No reviews yet',
-                style: TextStyle(fontSize: 18, color: Colors.grey),
-              ),
-            );
-          }
-
-          final reviews = snapshot.data!.docs;
-
-          return ListView.builder(
-            padding: EdgeInsets.all(16),
-            itemCount: reviews.length,
-            itemBuilder: (context, index) {
-              try {
-                final review = reviews[index].data() as Map<String, dynamic>;
-                final date = review['createdAt'] != null
-                    ? (review['createdAt'] as Timestamp).toDate()
-                    : DateTime.now();
-                final formattedDate = DateFormat('MMM d, y').format(date);
-
-                return Card(
-                  margin: EdgeInsets.only(bottom: 16),
-                  child: Padding(
-                    padding: EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              review['patientName']?.toString() ?? 'Anonymous',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                              ),
-                            ),
-                            Text(
-                              formattedDate,
-                              style: TextStyle(
-                                color: Colors.grey,
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 8),
-                        Row(
-                          children: [
-                            Icon(Icons.star, color: Colors.amber, size: 16),
-                            Text(
-                              ' ${(review['overallRating']?.toStringAsFixed(1)) ?? '0.0'}',
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 8),
-                        if (review['feedback'] != null && review['feedback'].toString().isNotEmpty)
-                          Text(
-                            review['feedback'].toString(),
-                            style: TextStyle(fontSize: 16),
-                          ),
-                        SizedBox(height: 8),
-                        Wrap(
-                          spacing: 8,
-                          children: [
-                            if (review['doctorRating'] != null)
-                              Chip(
-                                label: Text(
-                                  'Doctor: ${review['doctorRating'].toStringAsFixed(1)}',
-                                  style: TextStyle(color: Colors.white),
-                                ),
-                                backgroundColor: Colors.blue,
-                              ),
-                            if (review['clinicRating'] != null)
-                              Chip(
-                                label: Text(
-                                  'Clinic: ${review['clinicRating'].toStringAsFixed(1)}',
-                                  style: TextStyle(color: Colors.white),
-                                ),
-                                backgroundColor: Colors.green,
-                              ),
-                            if (review['staffRating'] != null)
-                              Chip(
-                                label: Text(
-                                  'Staff: ${review['staffRating'].toStringAsFixed(1)}',
-                                  style: TextStyle(color: Colors.white),
-                                ),
-                                backgroundColor: Colors.orange,
-                              ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              } catch (e) {
-                return Card(
-                  margin: EdgeInsets.only(bottom: 16),
-                  child: Padding(
-                    padding: EdgeInsets.all(16),
-                    child: Text(
-                      'Error loading review: ${e.toString()}',
-                      style: TextStyle(color: Colors.red),
-                    ),
-                  ),
-                );
-              }
-            },
-          );
-        },
       ),
     );
   }

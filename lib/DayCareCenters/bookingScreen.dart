@@ -3,10 +3,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 
 class BookingsScreen extends StatefulWidget {
-  final String doctorId;
-  final String doctorName;
+  final String DaycareId;
+  final String DaycareName;
 
-  BookingsScreen({Key? key, required this.doctorId, required this.doctorName}) : super(key: key);
+  BookingsScreen({Key? key, required this.DaycareId, required this.DaycareName}) : super(key: key);
 
   @override
   State<BookingsScreen> createState() => _BookingsScreenState();
@@ -27,7 +27,7 @@ class _BookingsScreenState extends State<BookingsScreen> {
     super.initState();
     FirebaseFirestore.instance
         .collection('Bookings')
-        .where('doctorId', isEqualTo: widget.doctorId)
+        .where('DaycareId', isEqualTo: widget.DaycareId)
         .snapshots()
         .listen((snapshot) {
       if (mounted) {
@@ -40,7 +40,7 @@ class _BookingsScreenState extends State<BookingsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('${widget.doctorName}`s Bookings', style: TextStyle(color: Colors.white)),
+        title: Text('${widget.DaycareName}`s Bookings', style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.blue.shade700,
         centerTitle: true,
         elevation: 0,
@@ -52,7 +52,7 @@ class _BookingsScreenState extends State<BookingsScreen> {
             child: StreamBuilder<QuerySnapshot>(
               stream: FirebaseFirestore.instance
                   .collection('Bookings')
-                  .where('doctorId', isEqualTo: widget.doctorId)
+                  .where('DaycareId', isEqualTo: widget.DaycareId)
                   .snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
@@ -236,13 +236,13 @@ class BookingCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header with doctor name and status
+            // Header with Daycare name and status
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(
                   child: Text(
-                    booking['doctorName'] ?? 'Doctor Name',
+                    booking['DaycareName'] ?? 'Daycare Name',
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,

@@ -4,14 +4,15 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:html' as html;
-import 'Dashboard/Dashboard.dart';
 
-class UnverifiedDoctorsScreen extends StatelessWidget {
+import '../Dashboard/Dashboard.dart';
+
+class UnverifiedDaycareScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Unverified Doctors'),
+        title: Text('Unverified Daycare',style: TextStyle(color: Colors.white),),
         centerTitle: true,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.white),
@@ -26,7 +27,7 @@ class UnverifiedDoctorsScreen extends StatelessWidget {
         flexibleSpace: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [Colors.blue.shade700, Colors.lightBlue.shade400],
+              colors: [Colors.blue.shade900, Colors.lightBlue.shade700],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -43,7 +44,7 @@ class UnverifiedDoctorsScreen extends StatelessWidget {
         ),
         child: StreamBuilder<QuerySnapshot>(
           stream: FirebaseFirestore.instance
-              .collection('Doctors')
+              .collection('DayCare')
               .where('isVerified', isEqualTo: false)
               .snapshots(),
           builder: (context, snapshot) {
@@ -54,7 +55,7 @@ class UnverifiedDoctorsScreen extends StatelessWidget {
             if (snapshot.hasError) {
               return Center(
                 child: Text(
-                  'Error loading doctors',
+                  'Error loading daycare center',
                   style: TextStyle(color: Colors.red),
                 ),
               );
@@ -68,7 +69,7 @@ class UnverifiedDoctorsScreen extends StatelessWidget {
                     Icon(Icons.people_outline, size: 60, color: Colors.grey),
                     SizedBox(height: 16),
                     Text(
-                      'No unverified doctors found',
+                      'No unverified Daycare found',
                       style: TextStyle(fontSize: 18, color: Colors.grey),
                     ),
                   ],
@@ -76,14 +77,14 @@ class UnverifiedDoctorsScreen extends StatelessWidget {
               );
             }
 
-            final doctors = snapshot.data!.docs;
+            final Daycare = snapshot.data!.docs;
 
             return ListView.builder(
               padding: EdgeInsets.all(12),
-              itemCount: doctors.length,
+              itemCount: Daycare.length,
               itemBuilder: (context, index) {
-                final doctor = doctors[index].data()! as Map<String, dynamic>;
-                final doctorId = doctors[index].id;
+                final Daycares = Daycare[index].data()! as Map<String, dynamic>;
+                final DaycaresId = Daycare[index].id;
 
                 return Card(
                   margin: EdgeInsets.symmetric(vertical: 8),
@@ -97,9 +98,9 @@ class UnverifiedDoctorsScreen extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => DoctorDetailsScreen(
-                            doctorData: doctor,
-                            doctorId: doctorId,
+                          builder: (context) => DaycaresDetailsScreen(
+                            DaycareData: Daycares,
+                            DaycaresId: DaycaresId,
                           ),
                         ),
                       );
@@ -110,10 +111,10 @@ class UnverifiedDoctorsScreen extends StatelessWidget {
                         children: [
                           CircleAvatar(
                             radius: 30,
-                            backgroundImage: doctor['photoUrl'] != null &&
-                                doctor['photoUrl'].isNotEmpty
-                                ? NetworkImage(doctor['photoUrl'])
-                                : AssetImage('assets/default_doctor.png') as ImageProvider,
+                            backgroundImage: Daycares['profileImageUrl'] != null &&
+                                Daycares['profileImageUrl'].isNotEmpty
+                                ? NetworkImage(Daycares['profileImageUrl'])
+                                : AssetImage('assets/default_Daycares.png') as ImageProvider,
                           ),
                           SizedBox(width: 16),
                           Expanded(
@@ -121,7 +122,7 @@ class UnverifiedDoctorsScreen extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  '${doctor['title']} ${doctor['name']}',
+                                  '${Daycares['name']}',
                                   style: TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
@@ -129,18 +130,10 @@ class UnverifiedDoctorsScreen extends StatelessWidget {
                                 ),
                                 SizedBox(height: 4),
                                 Text(
-                                  doctor['email'] ?? '',
+                                  Daycares['email'] ?? '',
                                   style: TextStyle(
                                     fontSize: 14,
                                     color: Colors.grey.shade600,
-                                  ),
-                                ),
-                                SizedBox(height: 4),
-                                Text(
-                                  doctor['Primary_specialization'] ?? 'Specialist',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: Colors.deepOrangeAccent.shade400,
                                   ),
                                 ),
                               ],
@@ -167,77 +160,50 @@ class UnverifiedDoctorsScreen extends StatelessWidget {
       ),
     );
   }
-
-  void _verifyDoctor(BuildContext context, String doctorId) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Verify Doctor'),
-        content: Text('Are you sure you want to verify this doctor?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('Cancel'),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.green,
-            ),
-            onPressed: () {
-              Navigator.pop(context);
-              FirebaseFirestore.instance
-                  .collection('Doctors')
-                  .doc(doctorId)
-                  .update({'isVerified': true})
-                  .then((_) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Doctor verified successfully!'),
-                    backgroundColor: Colors.green,
-                  ),
-                );
-              });
-            },
-            child: Text('Verify'),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
-class DoctorDetailsScreen extends StatefulWidget {
-  final Map<String, dynamic> doctorData;
-  final String doctorId;
+class DaycaresDetailsScreen extends StatefulWidget {
+  final Map<String, dynamic> DaycareData;
+  final String DaycaresId;
 
-  const DoctorDetailsScreen({
-    required this.doctorData,
-    required this.doctorId,
+  const DaycaresDetailsScreen({
+    required this.DaycareData,
+    required this.DaycaresId,
   });
 
   @override
-  State<DoctorDetailsScreen> createState() => _DoctorDetailsScreenState();
+  State<DaycaresDetailsScreen> createState() => _DaycaresDetailsScreenState();
 }
 
-class _DoctorDetailsScreenState extends State<DoctorDetailsScreen> {
-  // In the DoctorDetailsScreen class, add this state variable
+class _DaycaresDetailsScreenState extends State<DaycaresDetailsScreen> {
+  // In the DaycaresDetailsScreen class, add this state variable
   bool isVerified = false;
 
   @override
   void initState() {
     super.initState();
-    isVerified = widget.doctorData['isVerified'] ?? false;
+    isVerified = widget.DaycareData['isVerified'] ?? false;
   }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Doctor Profile'),
+        title: Text('${widget.DaycareData['name']} profile',style: TextStyle(color: Colors.white),),
         centerTitle: true,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () {
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => UnverifiedDaycareScreen()),
+                  (Route<dynamic> route) => false,
+            );
+          },
+        ),
         flexibleSpace: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [Colors.blue.shade700, Colors.lightBlue.shade400],
+              colors: [Colors.blue.shade900, Colors.lightBlue.shade700],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -263,7 +229,7 @@ class _DoctorDetailsScreenState extends State<DoctorDetailsScreen> {
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(16),
                   gradient: LinearGradient(
-                    colors: [Colors.blue.shade600, Colors.lightBlue.shade300],
+                    colors: [Colors.blue.shade900, Colors.lightBlue.shade700],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
@@ -288,10 +254,10 @@ class _DoctorDetailsScreenState extends State<DoctorDetailsScreen> {
                             backgroundColor: Colors.white,
                             child: CircleAvatar(
                               radius: 48,
-                              backgroundImage: widget.doctorData['photoUrl'] != null &&
-                                  widget.doctorData['photoUrl'].isNotEmpty
-                                  ? NetworkImage(widget.doctorData['photoUrl'])
-                                  : AssetImage('assets/default_doctor.png') as ImageProvider,
+                              backgroundImage: widget.DaycareData['profileImageUrl'] != null &&
+                                  widget.DaycareData['profileImageUrl'].isNotEmpty
+                                  ? NetworkImage(widget.DaycareData['profileImageUrl'])
+                                  : AssetImage('assets/default_Daycares.png') as ImageProvider,
                             ),
                           ),
                           Container(
@@ -311,7 +277,7 @@ class _DoctorDetailsScreenState extends State<DoctorDetailsScreen> {
                       ),
                       SizedBox(height: 16),
                       Text(
-                        '${widget.doctorData['title']} ${widget.doctorData['name']}',
+                        '${widget.DaycareData['name']}',
                         style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
@@ -321,7 +287,7 @@ class _DoctorDetailsScreenState extends State<DoctorDetailsScreen> {
                       ),
                       SizedBox(height: 4),
                       Text(
-                        widget.doctorData['Primary_specialization'] ?? "Specialist",
+                         "Specialist",
                         style: TextStyle(
                           fontSize: 16,
                           color: Colors.white.withOpacity(0.9),
@@ -331,11 +297,9 @@ class _DoctorDetailsScreenState extends State<DoctorDetailsScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          _buildStatItem(Icons.star, '${widget.doctorData['rating'] ?? '4.8'}', 'Rating'),
+                          _buildStatItem(Icons.star, '${widget.DaycareData['rating'] ?? '0.0'}', 'Rating'),
                           SizedBox(width: 20),
-                          _buildStatItem(Icons.medical_services, '${widget.doctorData['experience'] ?? '0'}+', 'Years Exp.'),
-                          SizedBox(width: 20),
-                          _buildStatItem(Icons.people, '${widget.doctorData['patients'] ?? '100'}+', 'Patients'),
+                          _buildStatItem(Icons.people, '${widget.DaycareData['childs'] ?? '0'}+', 'childs'),
                         ],
                       ),
                       SizedBox(height: 16),
@@ -345,7 +309,7 @@ class _DoctorDetailsScreenState extends State<DoctorDetailsScreen> {
                           // Also update the verify button to be disabled when already verified
                           ElevatedButton.icon(
                             icon: Icon(Icons.verified_user, size: 20),
-                            label: Text(isVerified ? 'Verified' : 'Verify Doctor'),
+                            label: Text(isVerified ? 'Verified' : 'Verify Daycare',style: TextStyle(color: Colors.black),),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: isVerified ? Colors.grey : Colors.green,
                               padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
@@ -354,7 +318,7 @@ class _DoctorDetailsScreenState extends State<DoctorDetailsScreen> {
                               ),
                             ),
                             onPressed: isVerified ? null : () {
-                              _verifyDoctor(context);
+                              _verifyDaycares(context);
                             },
                           ),
                           SizedBox(width: 16),
@@ -370,16 +334,16 @@ class _DoctorDetailsScreenState extends State<DoctorDetailsScreen> {
                               ),
                             ),
                             onPressed: () {
-                              final email = widget.doctorData['email'] ?? '';
+                              final email = widget.DaycareData['email'] ?? '';
                               if (email.isEmpty) {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('Doctor email not available')),
+                                  SnackBar(content: Text('Daycare email not available')),
                                 );
                                 return;
                               }
 
-                              final subject = Uri.encodeComponent('Care Cub Registration Inquiry - ${widget.doctorData['name']}');
-                              final body = Uri.encodeComponent('Dear Dr. ${widget.doctorData['name']},\n\n');
+                              final subject = Uri.encodeComponent('Care Cub Registration Inquiry - ${widget.DaycareData['name']}');
+                              final body = Uri.encodeComponent('Dear. ${widget.DaycareData['name']}, Daycare`s manager\n\n');
 
                               // Direct Gmail compose URL
                               final gmailUrl = 'https://mail.google.com/mail/?view=cm&fs=1'
@@ -421,85 +385,63 @@ class _DoctorDetailsScreenState extends State<DoctorDetailsScreen> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // About Section
-                  _buildSectionTitle('About Doctor'),
-                  Card(
-                    elevation: 2,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Padding(
-                      padding: EdgeInsets.all(16),
-                      child: Text(
-                        widget.doctorData['about'] ?? 'No description available',
-                        style: TextStyle(fontSize: 15, height: 1.5),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 16),
+
+                  SizedBox(height: 8),
 
                   // Basic Info
                   _buildSectionTitle('Basic Information'),
                   _buildInfoCard(
                     children: [
-                      _buildInfoRow(Icons.email, 'Email', widget.doctorData['email'] ?? 'N/A'),
-                      _buildInfoRow(Icons.phone, 'Phone', widget.doctorData['phone'] ?? 'N/A'),
-                      _buildInfoRow(Icons.location_city, 'City', widget.doctorData['city'] ?? 'N/A'),
-                      _buildInfoRow(Icons.work, 'Experience', '${widget.doctorData['experience'] ?? 'N/A'} years'),
+                      _buildInfoRow(Icons.email, 'Email', widget.DaycareData['email'] ?? 'N/A'),
+                      _buildInfoRow(Icons.phone, 'Phone', widget.DaycareData['phone'] ?? 'N/A'),
+                      _buildInfoRow(Icons.location_city, 'Address', widget.DaycareData['address'] ?? 'N/A'),
                       _buildInfoRow(
                         Icons.date_range,
                         'Registered On',
-                        widget.doctorData['createdAt'] != null
-                            ? DateFormat('MMMM dd, yyyy').format((widget.doctorData['createdAt'] as Timestamp).toDate())
+                        widget.DaycareData['createdAt'] != null
+                            ? DateFormat('MMMM dd, yyyy').format((widget.DaycareData['createdAt'] as Timestamp).toDate())
                             : 'N/A',
                       ),
-                      _buildInfoRow(Icons.medical_information, 'PMC Number', widget.doctorData['PMCNumber'] ?? 'N/A'),
+                      _buildInfoRow(Icons.medical_information, 'Licence number', widget.DaycareData['license'] ?? 'N/A'),
                     ],
                   ),
 
                   // Specializations
-                  _buildSectionTitle('Specializations'),
+                  _buildSectionTitle('Description'),
                   _buildInfoCard(
                     children: [
-                      _buildInfoRow(Icons.medical_services, 'Primary', widget.doctorData['Primary_specialization'] ?? 'N/A'),
-                      _buildInfoRow(Icons.medical_services, 'Secondary', widget.doctorData['Secondary_specialization'] ?? 'N/A'),
+                      _buildInfoRow(Icons.description,'',widget.DaycareData['description'] ?? 'N/A'),
                     ],
                   ),
-
-                  // Education
-                  _buildSectionTitle('Education'),
-                  if (widget.doctorData['EDU_INFO'] != null)
+                  _buildGallerySection(),
+                  _buildSectionTitle('safetyFeatures'),
+                  if (widget.DaycareData['safetyFeatures'] != null)
                     _buildInfoCard(
-                      children: List<String>.from(widget.doctorData['EDU_INFO'])
-                          .map((edu) => _buildInfoRow(Icons.school, 'Degree', edu))
-                          .toList(),
-                    ),
-
-                  // Conditions Treated
-                  _buildSectionTitle('Conditions Treated'),
-                  if (widget.doctorData['Condition'] != null)
-                    _buildInfoCard(
-                      children: List<String>.from(widget.doctorData['Condition'])
+                      children: List<String>.from(widget.DaycareData['safetyFeatures'])
                           .map((condition) => _buildInfoRow(Icons.health_and_safety, 'Condition', condition))
                           .toList(),
                     ),
-
-                  // Services Offered
-                  _buildSectionTitle('Services Offered'),
-                  if (widget.doctorData['Service_Offered'] != null)
+                  _buildSectionTitle('Facilities'),
+                  if (widget.DaycareData['facilities'] != null)
                     _buildInfoCard(
-                      children: List<String>.from(widget.doctorData['Service_Offered'])
-                          .map((service) => _buildInfoRow(Icons.local_hospital, 'Service', service))
+                      children: List<String>.from(widget.DaycareData['facilities'])
+                          .map((condition) => _buildInfoRow(Icons.discount, 'facility', condition))
+                          .toList(),
+                    ),
+                  _buildSectionTitle('Programs'),
+                  if (widget.DaycareData['programs'] != null)
+                    _buildInfoCard(
+                      children: List<Map<String, dynamic>>.from(widget.DaycareData['programs'])
+                          .map((program) => _buildInfoRow(Icons.school, 'Program', program['name'] ?? ''))
                           .toList(),
                     ),
 
                   // Clinics Information
-                  _buildSectionTitle('Clinics'),
-                  StreamBuilder<QuerySnapshot>(
+                  _buildSectionTitle('Availability'),
+                  StreamBuilder<DocumentSnapshot>(
                     stream: FirebaseFirestore.instance
-                        .collection('Doctors')
-                        .doc(widget.doctorId)
-                        .collection('clinics')
+                        .collection('DayCare')
+                        .doc(widget.DaycaresId)
                         .snapshots(),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
@@ -507,72 +449,46 @@ class _DoctorDetailsScreenState extends State<DoctorDetailsScreen> {
                       }
 
                       if (snapshot.hasError) {
-                        return Text('Error loading clinics: ${snapshot.error}');
+                        return Text('Error loading availability: ${snapshot.error}');
                       }
 
-                      if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                        return Text('No clinics found');
+                      if (!snapshot.hasData || !snapshot.data!.exists) {
+                        return Text('No availability information found');
                       }
 
-                      final clinics = snapshot.data!.docs;
+                      final daycareData = snapshot.data!.data() as Map<String, dynamic>;
 
-                      return Column(
-                        children: clinics.map((clinicDoc) {
-                          final clinic = clinicDoc.data() as Map<String, dynamic>;
-                          return Card(
-                            margin: EdgeInsets.only(bottom: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            elevation: 3,
-                            child: Padding(
-                              padding: EdgeInsets.all(16),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    children: [
-                                      Icon(Icons.business, color: Colors.blue),
-                                      SizedBox(width: 8),
-                                      Text(
-                                        clinic['ClinicName'] ?? 'Unnamed Clinic',
-                                        style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  SizedBox(height: 12),
-                                  _buildClinicInfoRow(Icons.location_on, 'Address', clinic['Address']),
-                                  _buildClinicInfoRow(Icons.location_city, 'City', clinic['ClinicCity']),
-                                  _buildClinicInfoRow(Icons.attach_money, 'Fees', clinic['Fees']),
-                                  _buildClinicInfoRow(Icons.map, 'Location', clinic['Location']),
+                      return Card(
+                        margin: EdgeInsets.only(bottom: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        elevation: 3,
+                        child: Padding(
+                          padding: EdgeInsets.all(16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              if (daycareData['operatingDays'] != null && daycareData['operatingDays'] is List)
+                                _buildInfoRow(
+                                  Icons.calendar_today,
+                                  'Operating Days',
+                                  (daycareData['operatingDays'] as List).join(', '),
+                                ),
 
-                                  // Availability
-                                  if (clinic['Availability'] != null) ...[
-                                    SizedBox(height: 12),
-                                    Row(
-                                      children: [
-                                        Icon(Icons.access_time, color: Colors.blue),
-                                        SizedBox(width: 8),
-                                        Text(
-                                          'Availability:',
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 16,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    SizedBox(height: 8),
-                                    ..._buildAvailabilityWidgets(clinic['Availability']),
-                                  ],
-                                ],
-                              ),
-                            ),
-                          );
-                        }).toList(),
+                              if (daycareData['hours'] != null)
+                                _buildInfoRow(
+                                  Icons.access_time,
+                                  'Hours',
+                                  daycareData['hours'].toString(),
+                                ),
+
+                              // If you have more complex availability data structure
+                              if (daycareData['Availability'] != null)
+                                ..._buildAvailabilityWidgets(daycareData['Availability']),
+                            ],
+                          ),
+                        ),
                       );
                     },
                   ),
@@ -585,13 +501,142 @@ class _DoctorDetailsScreenState extends State<DoctorDetailsScreen> {
       ),
     );
   }
+  Widget _buildGallerySection() {
+    if (widget.DaycareData['galleryImages'] == null ||
+        (widget.DaycareData['galleryImages'] as List).isEmpty) {
+      return SizedBox.shrink();
+    }
 
-  void _verifyDoctor(BuildContext context) {
+    final galleryImages = List<String>.from(widget.DaycareData['galleryImages']);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionTitle('Gallery'),
+        SizedBox(height: 8),
+        Container(
+          height: 120,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: galleryImages.length,
+            itemBuilder: (context, index) {
+              return GestureDetector(
+                onTap: () {
+                  _showImagePreview(context, galleryImages, index);
+                },
+                child: Container(
+                  width: 150,
+                  margin: EdgeInsets.only(right: 12),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8),
+                    image: DecorationImage(
+                      image: NetworkImage(galleryImages[index]),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+        SizedBox(height: 16),
+      ],
+    );
+  }
+
+  void _showImagePreview(BuildContext context, List<String> images, int initialIndex) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: EdgeInsets.all(20),
+        child: Stack(
+          alignment: Alignment.topRight,
+          children: [
+            PageView.builder(
+              itemCount: images.length,
+              controller: PageController(initialPage: initialIndex),
+              itemBuilder: (context, index) {
+                return InteractiveViewer(
+                  panEnabled: true,
+                  minScale: 0.5,
+                  maxScale: 3,
+                  child: Image.network(
+                    images[index],
+                    fit: BoxFit.contain,
+                  ),
+                );
+              },
+            ),
+            IconButton(
+              icon: Icon(Icons.close, color: Colors.white, size: 30),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+  List<Widget> _buildAvailabilityWidgets(dynamic availability) {
+    if (availability == null) return [SizedBox.shrink()];
+
+    final widgets = <Widget>[];
+
+    if (availability is Map) {
+      // Handle map format availability
+      if (availability['days'] != null) {
+        widgets.add(
+          _buildInfoRow(
+            Icons.calendar_today,
+            'Days',
+            availability['days'] is List
+                ? (availability['days'] as List).join(', ')
+                : availability['days'].toString(),
+          ),
+        );
+      }
+
+      if (availability['hours'] != null) {
+        widgets.add(
+          _buildInfoRow(
+            Icons.access_time,
+            'Hours',
+            availability['hours'].toString(),
+          ),
+        );
+      }
+
+      if (availability['timeSlots'] != null && availability['timeSlots'] is List) {
+        widgets.addAll(
+          (availability['timeSlots'] as List).map((slot) =>
+              _buildInfoRow(
+                Icons.schedule,
+                slot['day'] ?? 'Time',
+                '${slot['startTime']} - ${slot['endTime']}',
+              ),
+          ).toList(),
+        );
+      }
+    }
+    else if (availability is String) {
+      // Handle simple string format
+      widgets.add(
+        _buildInfoRow(
+          Icons.access_time,
+          'Availability',
+          availability,
+        ),
+      );
+    }
+
+    return widgets;
+  }
+  void _verifyDaycares(BuildContext context) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Verify Doctor'),
-        content: Text('Are you sure you want to verify this doctor?'),
+        title: Text('Verify Daycares'),
+        content: Text('Are you sure you want to verify this Daycares?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -604,8 +649,8 @@ class _DoctorDetailsScreenState extends State<DoctorDetailsScreen> {
             onPressed: () {
               Navigator.pop(context);
               FirebaseFirestore.instance
-                  .collection('Doctors')
-                  .doc(widget.doctorId)
+                  .collection('DayCare')
+                  .doc(widget.DaycaresId)
                   .update({'isVerified': true})
                   .then((_) {
                 setState(() {
@@ -613,7 +658,7 @@ class _DoctorDetailsScreenState extends State<DoctorDetailsScreen> {
                 });
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text('Doctor verified successfully!'),
+                    content: Text('Daycare verified successfully!'),
                     backgroundColor: Colors.green,
                   ),
                 );
@@ -665,34 +710,6 @@ class _DoctorDetailsScreenState extends State<DoctorDetailsScreen> {
         ),
       ),
     );
-  }
-
-  List<Widget> _buildAvailabilityWidgets(Map<String, dynamic>? availability) {
-    if (availability == null) return [];
-
-    final days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-    return days.where((day) => availability[day] != null).map((day) {
-      final times = availability[day];
-      return Padding(
-        padding: EdgeInsets.only(bottom: 8, left: 32),
-        child: Row(
-          children: [
-            Container(
-              width: 100,
-              child: Text(
-                day,
-                style: TextStyle(fontWeight: FontWeight.w500),
-              ),
-            ),
-            Chip(
-              label: Text('${times['start']} - ${times['end']}'),
-              backgroundColor: Colors.blue.shade50,
-              labelStyle: TextStyle(color: Colors.blue.shade800),
-            ),
-          ],
-        ),
-      );
-    }).toList();
   }
 
   Widget _buildClinicInfoRow(IconData icon, String label, String? value) {
